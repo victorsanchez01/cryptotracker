@@ -22,7 +22,7 @@ Aplicación Flask para visualizar las principales criptomonedas en tiempo real c
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/<tu-usuario>/cryptotracker.git
+   git clone https://github.com/victorsanchez01/cryptotracker.git
    cd cryptotracker
    ```
 2. Crear y activar un entorno virtual (opcional pero recomendado):
