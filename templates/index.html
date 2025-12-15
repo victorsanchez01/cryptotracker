@@ -1,0 +1,129 @@
+<!--
+//  index.html
+//  CryptoTracker
+//
+//  Created by Cascade on Dec 14, 2025.
+//  Copyright © 2025 CryptoTracker. All rights reserved.
+-->
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CryptoTracker dashboard para visualizar criptomonedas en tiempo real."
+    />
+    <title>CryptoTracker</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+      integrity="sha256-0q+JdOlScWOHcunpUk21uab1jW7C1deBQARHtKMcaB4="
+      crossorigin="anonymous"
+      defer
+    ></script>
+  </head>
+  <body class="theme-dark">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true"></span>
+        <div class="brand-copy">
+          <p class="brand-kicker">Live Markets</p>
+          <h1>CryptoTracker</h1>
+        </div>
+      </div>
+      <form id="searchForm" class="search-bar" role="search">
+        <label for="searchInput" class="sr-only">Buscar criptomoneda</label>
+        <input
+          id="searchInput"
+          type="search"
+          name="query"
+          placeholder="Buscar por nombre o símbolo..."
+          autocomplete="off"
+        />
+        <button type="submit" aria-label="Buscar">Buscar</button>
+      </form>
+    </header>
+
+    <main class="dashboard" role="main">
+      <section class="crypto-grid-section" aria-labelledby="marketHeading">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Top 10 Market Cap</p>
+            <h2 id="marketHeading">Visión general del mercado</h2>
+          </div>
+          <button id="refreshButton" class="ghost-button">Actualizar</button>
+        </div>
+
+        <div class="table-wrapper" role="table" aria-label="Top 10 criptomonedas">
+          <div class="table-row table-head" role="row">
+            <span role="columnheader">#</span>
+            <span role="columnheader">Nombre</span>
+            <span role="columnheader">Precio</span>
+            <span role="columnheader">24h</span>
+            <span role="columnheader">Market Cap</span>
+            <span role="columnheader">Volumen</span>
+          </div>
+          <div id="cryptoGrid" class="table-body" role="rowgroup"></div>
+        </div>
+      </section>
+
+      <section
+        id="chartPanel"
+        class="chart-panel hidden"
+        aria-live="polite"
+        aria-labelledby="chartTitle"
+      >
+        <div class="chart-header">
+          <div>
+            <p class="eyebrow">Historial 7 días</p>
+            <h3 id="chartTitle">Selecciona una criptomoneda</h3>
+          </div>
+          <button id="closeChartPanel" class="ghost-button" aria-label="Cerrar gráfica">
+            &times;
+          </button>
+        </div>
+        <div class="chart-content">
+          <canvas id="historyChart" aria-label="Gráfico histórico"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <section id="modalOverlay" class="modal-overlay hidden" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <h3 id="modalTitle">Detalle de criptomoneda</h3>
+          <button id="closeModal" class="ghost-button" aria-label="Cerrar modal">
+            &times;
+          </button>
+        </div>
+        <div id="modalBody" class="modal-body">
+          <p>Selecciona una criptomoneda para ver el detalle.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      <p>&copy; {{ current_year | default(2025) }} CryptoTracker. Datos por CoinGecko.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  </body>
+</html>
