@@ -283,6 +283,8 @@ const updateChart = (coin, prices) => {
 const loadCoinHistory = async (coin) => {
   const chartContent = elements.chartPanel.querySelector(".chart-content");
   const spinner = createSpinner();
+  elements.chartPanel.classList.remove("hidden");
+  elements.chartTitle.textContent = `Cargando historial para ${coin.name}...`;
   chartContent.appendChild(spinner);
   try {
     const payload = await fetchJSON(API_ROUTES.HISTORY(coin.id));

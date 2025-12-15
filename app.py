@@ -6,7 +6,8 @@
 #  Copyright © 2025 CryptoTracker. All rights reserved.
 #
 
-from datetime import datetime
+import os
+from datetime import UTC, datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -31,8 +32,55 @@ cache: Dict[str, Any] = {
 }
 
 
+def _env_flag(name: str, default: str = "0") -> bool:
+    return os.getenv(name, default).lower() in {"1", "true", "yes"}
+
+
+app.config.setdefault("USE_MOCK_DATA", _env_flag("MOCK_COINGECKO"))
+
+MOCK_MARKET_DATA: List[Dict[str, Any]] = [
+    {
+        "id": "bitcoin",
+        "symbol": "btc",
+        "name": "Bitcoin",
+        "current_price": 45000,
+        "price_change_percentage_24h": 3.2,
+        "market_cap": 880_000_000_000,
+        "image": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+        "total_volume": 38_000_000_000,
+    },
+    *[
+        {
+            "id": f"mock-coin-{index}",
+            "symbol": f"mc{index}",
+            "name": f"Mock Coin {index}",
+            "current_price": 1000 + index * 10,
+            "price_change_percentage_24h": (-1) ** index * 2.5,
+            "market_cap": 10_000_000_000 + index * 1_000_000_000,
+            "image": "https://via.placeholder.com/64",
+            "total_volume": 500_000_000 + index * 100_000_000,
+        }
+        for index in range(1, 11)
+    ],
+][:TOP_LIMIT]
+
+
+def set_mock_data(enabled: bool = True) -> None:
+    app.config["USE_MOCK_DATA"] = enabled
+
+
+def use_mock_data() -> bool:
+    env_override = os.getenv("MOCK_COINGECKO")
+    if env_override is not None:
+        return _env_flag("MOCK_COINGECKO")
+    return bool(app.config.get("USE_MOCK_DATA"))
+
+
 def format_timestamp(value: Optional[datetime]) -> Optional[str]:
-    return value.isoformat() + "Z" if value else None
+    if not value:
+        return None
+    aware_value = value.astimezone(UTC)
+    return aware_value.isoformat().replace("+00:00", "Z")
 
 
 def sanitize_market_data(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -53,6 +101,12 @@ def sanitize_market_data(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 
 def fetch_top_cryptos() -> List[Dict[str, Any]]:
+    if use_mock_data():
+        sanitized = sanitize_market_data(MOCK_MARKET_DATA)
+        cache["cryptos"]["data"] = sanitized
+        cache["cryptos"]["timestamp"] = datetime.now(UTC)
+        return sanitized
+
     params = {
         "vs_currency": VS_CURRENCY,
         "order": "market_cap_desc",
@@ -64,11 +118,24 @@ def fetch_top_cryptos() -> List[Dict[str, Any]]:
     response.raise_for_status()
     sanitized = sanitize_market_data(response.json())
     cache["cryptos"]["data"] = sanitized
-    cache["cryptos"]["timestamp"] = datetime.utcnow()
+    cache["cryptos"]["timestamp"] = datetime.now(UTC)
     return sanitized
 
 
 def fetch_crypto_history(coin_id: str) -> Dict[str, Any]:
+    if use_mock_data():
+        now = datetime.now(UTC)
+        prices = [
+            [int((now - timedelta(days=offset)).timestamp() * 1000), 1000 + offset * 5]
+            for offset in range(HISTORY_DAYS)
+        ]
+        payload = {"id": coin_id, "prices": prices}
+        cache["history"][coin_id] = {
+            "data": payload,
+            "timestamp": datetime.now(UTC),
+        }
+        return payload
+
     params = {"vs_currency": VS_CURRENCY, "days": HISTORY_DAYS}
     url = COINGECKO_HISTORY_URL.format(coin_id=coin_id)
     response = requests.get(url, params=params, timeout=10)
@@ -76,7 +143,7 @@ def fetch_crypto_history(coin_id: str) -> Dict[str, Any]:
     payload = {"id": coin_id, "prices": response.json().get("prices", [])}
     cache["history"][coin_id] = {
         "data": payload,
-        "timestamp": datetime.utcnow(),
+        "timestamp": datetime.now(UTC),
     }
     return payload
 

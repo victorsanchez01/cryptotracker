@@ -82,6 +82,37 @@ cryptotracker/
     └── index.html
 ```
 
+## Testing
+
+1. **Instalar dependencias de testing**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Ejecutar solo tests unitarios**
+   ```bash
+    pytest -m unit
+   ```
+
+3. **Ejecutar solo tests E2E (requiere servidor Flask en http://localhost:5000)**
+   ```bash
+    pytest -m e2e
+   ```
+
+4. **Ejecutar todo el suite con cobertura y reporte HTML**
+   - macOS/Linux:
+     ```bash
+     ./run_tests.sh
+     ```
+   - Windows:
+     ```bat
+     run_tests.bat
+     ```
+
+5. **Ver el reporte de cobertura**
+   1. Ejecuta los scripts anteriores (generan `htmlcov/`).
+   2. Abre `htmlcov/index.html` en tu navegador favorito.
+
 ## Licencia
 
 Este proyecto está licenciado bajo la [Licencia MIT](LICENSE).
